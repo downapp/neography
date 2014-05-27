@@ -5,7 +5,7 @@ require 'multi_json'
 require 'logger'
 require 'ostruct'
 require 'os'
-require 'zip/filesystem'
+# require 'zip/filesystem'
 
 require 'neography/multi_json_parser'
 

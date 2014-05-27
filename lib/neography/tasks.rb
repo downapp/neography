@@ -1,62 +1,62 @@
 # borrowed from architect4r
 require 'os'
-require 'zip'
+# require 'zip'
 require 'net/http'
 
 namespace :neo4j do
-  desc "Install Neo4j"
-  task :install, :edition, :version do |t, args|
-    args.with_defaults(:edition => "community", :version => "2.0.3")
-    puts "Installing Neo4j-#{args[:edition]}-#{args[:version]}"
-    
-    if OS::Underlying.windows?
-      # Download Neo4j    
-      unless File.exist?('neo4j.zip')
-        df = File.open('neo4j.zip', 'wb')
-        begin
-          Net::HTTP.start("dist.neo4j.org") do |http|
-            http.request_get("/neo4j-#{args[:edition]}-#{args[:version]}-windows.zip") do |resp|
-                resp.read_body do |segment|
-                    df.write(segment)
-                end
-            end
-          end
-        ensure
-          df.close()
-        end
-      end
-
-      # Extract and move to neo4j directory
-      unless File.exist?('neo4j')
-        Zip::File.open('neo4j.zip') do |zip_file|
-          zip_file.each do |f|
-           f_path=File.join(".", f.name)
-           FileUtils.mkdir_p(File.dirname(f_path))
-           begin
-             zip_file.extract(f, f_path) unless File.exist?(f_path)
-           rescue
-             puts f.name + " failed to extract."
-           end
-          end
-        end
-        FileUtils.mv "neo4j-#{args[:edition]}-#{args[:version]}", "neo4j"
-     end
-
-      # Install if running with Admin Privileges
-      if %x[reg query "HKU\\S-1-5-19"].size > 0 
-        %x[neo4j/bin/neo4j install]
-        puts "Neo4j Installed as a service."
-      end
-
-    else    
-      %x[curl -O http://dist.neo4j.org/neo4j-#{args[:edition]}-#{args[:version]}-unix.tar.gz]
-      %x[tar -xvzf neo4j-#{args[:edition]}-#{args[:version]}-unix.tar.gz]
-      %x[mv neo4j-#{args[:edition]}-#{args[:version]} neo4j]
-      %x[rm neo4j-#{args[:edition]}-#{args[:version]}-unix.tar.gz]
-      puts "Neo4j Installed in to neo4j directory."
-    end
-    puts "Type 'rake neo4j:start' to start it"
-  end
+  # desc "Install Neo4j"
+  # task :install, :edition, :version do |t, args|
+  #   args.with_defaults(:edition => "community", :version => "2.0.3")
+  #   puts "Installing Neo4j-#{args[:edition]}-#{args[:version]}"
+  #   
+  #   if OS::Underlying.windows?
+  #     # Download Neo4j    
+  #     unless File.exist?('neo4j.zip')
+  #       df = File.open('neo4j.zip', 'wb')
+  #       begin
+  #         Net::HTTP.start("dist.neo4j.org") do |http|
+  #           http.request_get("/neo4j-#{args[:edition]}-#{args[:version]}-windows.zip") do |resp|
+  #               resp.read_body do |segment|
+  #                   df.write(segment)
+  #               end
+  #           end
+  #         end
+  #       ensure
+  #         df.close()
+  #       end
+  #     end
+  # 
+  #     # Extract and move to neo4j directory
+  #     unless File.exist?('neo4j')
+  #       Zip::File.open('neo4j.zip') do |zip_file|
+  #         zip_file.each do |f|
+  #          f_path=File.join(".", f.name)
+  #          FileUtils.mkdir_p(File.dirname(f_path))
+  #          begin
+  #            zip_file.extract(f, f_path) unless File.exist?(f_path)
+  #          rescue
+  #            puts f.name + " failed to extract."
+  #          end
+  #         end
+  #       end
+  #       FileUtils.mv "neo4j-#{args[:edition]}-#{args[:version]}", "neo4j"
+  #    end
+  # 
+  #     # Install if running with Admin Privileges
+  #     if %x[reg query "HKU\\S-1-5-19"].size > 0 
+  #       %x[neo4j/bin/neo4j install]
+  #       puts "Neo4j Installed as a service."
+  #     end
+  # 
+  #   else    
+  #     %x[curl -O http://dist.neo4j.org/neo4j-#{args[:edition]}-#{args[:version]}-unix.tar.gz]
+  #     %x[tar -xvzf neo4j-#{args[:edition]}-#{args[:version]}-unix.tar.gz]
+  #     %x[mv neo4j-#{args[:edition]}-#{args[:version]} neo4j]
+  #     %x[rm neo4j-#{args[:edition]}-#{args[:version]}-unix.tar.gz]
+  #     puts "Neo4j Installed in to neo4j directory."
+  #   end
+  #   puts "Type 'rake neo4j:start' to start it"
+  # end
   
   desc "Start the Neo4j Server"
   task :start do
@@ -154,54 +154,54 @@ namespace :neo4j do
     end
   end
 
-  task :get_spatial, :version  do |t, args|
-    args.with_defaults(:version => "2.0.1")
-    puts "Installing Neo4j-Spatial #{args[:version]}"
-
-      unless File.exist?('neo4j-spatial.zip')
-        df = File.open('neo4j-spatial.zip', 'wb')
-        case args[:version]
-          when "2.0.1"
-            dist = "m2.neo4j.org"
-            request = "/content/repositories/releases/org/neo4j/neo4j-spatial/0.13-neo4j-2.0.1/neo4j-spatial-0.13-neo4j-2.0.1-server-plugin.zip"
-          when "2.0.0"
-            dist = "dist.neo4j.org"
-            request = "/spatial/neo4j-spatial-0.12-neo4j-2.0.0-server-plugin.zip"
-          when "1.9"
-            dist = "dist.neo4j.org.s3.amazonaws.com"
-            request = "/spatial/neo4j-spatial-0.11-neo4j-1.9-server-plugin.zip"
-          when "1.8.2"
-            dist = "dist.neo4j.org.s3.amazonaws.com"
-            request = "/spatial/neo4j-spatial-0.9.1-neo4j-1.8.2-server-plugin.zip"
-          else
-            abort("I don't know that version of the neo4j spatial plugin")
-        end
-        
-        begin
-          Net::HTTP.start(dist) do |http|            
-            http.request_get(request) do |resp|
-                resp.read_body do |segment|
-                    df.write(segment)
-                end
-            end
-          end
-        ensure
-          df.close()
-        end
-      end
-
-      # Extract to neo4j plugins directory
-      Zip::File.open('neo4j-spatial.zip') do |zip_file|
-        zip_file.each do |f|
-         f_path=File.join("neo4j/plugins/", f.name)
-         FileUtils.mkdir_p(File.dirname(f_path))
-         begin
-           zip_file.extract(f, f_path) unless File.exist?(f_path)
-         rescue
-           puts f.name + " failed to extract."
-         end
-        end
-     end
-
-  end
-end  
+#   task :get_spatial, :version  do |t, args|
+#     args.with_defaults(:version => "2.0.1")
+#     puts "Installing Neo4j-Spatial #{args[:version]}"
+# 
+#       unless File.exist?('neo4j-spatial.zip')
+#         df = File.open('neo4j-spatial.zip', 'wb')
+#         case args[:version]
+#           when "2.0.1"
+#             dist = "m2.neo4j.org"
+#             request = "/content/repositories/releases/org/neo4j/neo4j-spatial/0.13-neo4j-2.0.1/neo4j-spatial-0.13-neo4j-2.0.1-server-plugin.zip"
+#           when "2.0.0"
+#             dist = "dist.neo4j.org"
+#             request = "/spatial/neo4j-spatial-0.12-neo4j-2.0.0-server-plugin.zip"
+#           when "1.9"
+#             dist = "dist.neo4j.org.s3.amazonaws.com"
+#             request = "/spatial/neo4j-spatial-0.11-neo4j-1.9-server-plugin.zip"
+#           when "1.8.2"
+#             dist = "dist.neo4j.org.s3.amazonaws.com"
+#             request = "/spatial/neo4j-spatial-0.9.1-neo4j-1.8.2-server-plugin.zip"
+#           else
+#             abort("I don't know that version of the neo4j spatial plugin")
+#         end
+#         
+#         begin
+#           Net::HTTP.start(dist) do |http|            
+#             http.request_get(request) do |resp|
+#                 resp.read_body do |segment|
+#                     df.write(segment)
+#                 end
+#             end
+#           end
+#         ensure
+#           df.close()
+#         end
+#       end
+# 
+#       # Extract to neo4j plugins directory
+#       Zip::File.open('neo4j-spatial.zip') do |zip_file|
+#         zip_file.each do |f|
+#          f_path=File.join("neo4j/plugins/", f.name)
+#          FileUtils.mkdir_p(File.dirname(f_path))
+#          begin
+#            zip_file.extract(f, f_path) unless File.exist?(f_path)
+#          rescue
+#            puts f.name + " failed to extract."
+#          end
+#         end
+#      end
+# 
+#   end
+# end  
