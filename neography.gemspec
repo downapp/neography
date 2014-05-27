@@ -3,7 +3,7 @@ $:.push File.expand_path("../lib", __FILE__)
 require "neography/version"
 
 Gem::Specification.new do |s|
-  s.name        = "neography"
+  s.name        = "neography-down"
   s.version     = Neography::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = "Max De Marzi"
@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.description = "A Ruby wrapper to the Neo4j Rest API see http://docs.neo4j.org/chunked/stable/rest-api.html for more details."
   s.license     = 'MIT'
   
-  s.rubyforge_project = "neography"
+  s.rubyforge_project = "neography-down"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
