@@ -99,9 +99,11 @@ module Neography
           :value => value,
           :type  => type,
           :start => @connection.configuration + "/node/#{get_id(from)}",
-          :end   => @connection.configuration + "/node/#{get_id(to)}",
-          :properties => props
+          :end   => @connection.configuration + "/node/#{get_id(to)}"
         }
+        
+        body[:properties] if props
+        
         options = { :body => body.to_json, :headers => json_content_type }
 
         @connection.post("/index/relationship/%{index}?unique" % {:index => index}, options)
