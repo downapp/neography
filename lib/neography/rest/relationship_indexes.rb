@@ -102,7 +102,7 @@ module Neography
           :end   => @connection.configuration + "/node/#{get_id(to)}"
         }
         
-        body[:properties] if props
+        body[:properties] = props unless props.nil?
         
         options = { :body => body.to_json, :headers => json_content_type }
 
